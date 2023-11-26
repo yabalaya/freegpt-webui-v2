@@ -21,7 +21,7 @@ mailgw_temporary_email
 pycryptodome
 random-password-generator
 numpy>=1.21.6 # pinned to avoid a vulnerability
-tornado>=6.3.2 # pinned to avoid a vulnerability
+tornado>=6.2 # pinned to avoid a vulnerability
 PyExecJS
 browser_cookie3
 js2py
