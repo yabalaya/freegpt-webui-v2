@@ -1,22 +1,31 @@
-from __future__       import annotations
-from .Acytoo          import Acytoo
+from __future__ import annotations
+
+from .base_provider  import BaseProvider, AsyncProvider, AsyncGeneratorProvider
+from .retry_provider import RetryProvider
+from .deprecated     import *
+from .needs_auth     import *
+from .unfinished     import *
+from .selenium       import *
+
 from .AiAsk           import AiAsk
-from .Aibn            import Aibn
 from .Aichat          import Aichat
-from .Ails            import Ails
+from .AiChatOnline    import AiChatOnline
 from .AItianhu        import AItianhu
 from .AItianhuSpace   import AItianhuSpace
+from .Berlin          import Berlin
 from .Bing            import Bing
-#from .ChatBase        import ChatBase
+from .ChatAnywhere    import ChatAnywhere
+from .ChatBase        import ChatBase
 from .ChatForAi       import ChatForAi
 from .Chatgpt4Online  import Chatgpt4Online
 from .ChatgptAi       import ChatgptAi
 from .ChatgptDemo     import ChatgptDemo
-from .ChatgptDuo      import ChatgptDuo
+from .ChatgptDemoAi   import ChatgptDemoAi
 from .ChatgptFree     import ChatgptFree
 from .ChatgptLogin    import ChatgptLogin
+from .ChatgptNext     import ChatgptNext
 from .ChatgptX        import ChatgptX
-from .Cromicle        import Cromicle
+from .DeepInfra       import DeepInfra
 from .FakeGpt         import FakeGpt
 from .FreeGpt         import FreeGpt
 from .GPTalk          import GPTalk
@@ -24,163 +33,42 @@ from .GptChatly       import GptChatly
 from .GptForLove      import GptForLove
 from .GptGo           import GptGo
 from .GptGod          import GptGod
+from .GptTalkRu       import GptTalkRu
 from .Hashnode        import Hashnode
+from .Koala           import Koala
 from .Liaobots        import Liaobots
 from .Llama2          import Llama2
 from .MyShell         import MyShell
 from .NoowAi          import NoowAi
+from .OnlineGpt       import OnlineGpt
 from .Opchatgpts      import Opchatgpts
+from .PerplexityAi    import PerplexityAi
 from .Phind           import Phind
+from .Pi              import Pi
+from .TalkAi          import TalkAi
 from .Vercel          import Vercel
 from .Ylokh           import Ylokh
 from .You             import You
 from .Yqcloud         import Yqcloud
-from .Geekgpt         import GeekGpt
+from .GeekGpt         import GeekGpt
 
-from .base_provider  import BaseProvider, AsyncProvider, AsyncGeneratorProvider
-from .retry_provider import RetryProvider
-from .deprecated     import *
-from .needs_auth     import *
-from .unfinished     import *
+import sys
+
+__modules__: list = [
+    getattr(sys.modules[__name__], provider) for provider in dir()
+    if not provider.startswith("__")
+]
+__providers__: list[type[BaseProvider]] = [
+    provider for provider in __modules__
+    if isinstance(provider, type)
+    and issubclass(provider, BaseProvider)
+]
+__all__: list[str] = [
+    provider.__name__ for provider in __providers__
+]
+__map__: dict[str, type[BaseProvider]] = dict([
+    (provider.__name__, provider) for provider in __providers__
+])
 
 class ProviderUtils:
-    convert: dict[str, BaseProvider] = {
-        'AItianhu': AItianhu,
-        'AItianhuSpace': AItianhuSpace,
-        'Acytoo': Acytoo,
-        'AiAsk': AiAsk,
-        'AiService': AiService,
-        'Aibn': Aibn,
-        'Aichat': Aichat,
-        'Ails': Ails,
-        'Aivvm': Aivvm,
-        'AsyncGeneratorProvider': AsyncGeneratorProvider,
-        'AsyncProvider': AsyncProvider,
-        'Bard': Bard,
-        'BaseProvider': BaseProvider,
-        'Bing': Bing,
-        #'ChatBase': ChatBase,
-        'ChatForAi': ChatForAi,
-        'Chatgpt4Online': Chatgpt4Online,
-        'ChatgptAi': ChatgptAi,
-        'ChatgptDemo': ChatgptDemo,
-        'ChatgptDuo': ChatgptDuo,
-        'ChatgptFree': ChatgptFree,
-        'ChatgptLogin': ChatgptLogin,
-        'ChatgptX': ChatgptX,
-        'CodeLinkAva': CodeLinkAva,
-        'Cromicle': Cromicle,
-        'DfeHub': DfeHub,
-        'EasyChat': EasyChat,
-        'Equing': Equing,
-        'FastGpt': FastGpt,
-        'Forefront': Forefront,
-        'FakeGpt': FakeGpt,
-        'FreeGpt': FreeGpt,
-        'GPTalk': GPTalk,
-        'GptChatly': GptChatly,
-        'GetGpt': GetGpt,
-        'GptForLove': GptForLove,
-        'GptGo': GptGo,
-        'GptGod': GptGod,
-        'Hashnode': Hashnode,
-        'H2o': H2o,
-        'HuggingChat': HuggingChat,
-        'Komo': Komo,
-        'Liaobots': Liaobots,
-        'Llama2': Llama2,
-        'Lockchat': Lockchat,
-        'MikuChat': MikuChat,
-        'Myshell': Myshell,
-        'MyShell': MyShell,
-        'NoowAi': NoowAi,
-        'Opchatgpts': Opchatgpts,
-        'OpenAssistant': OpenAssistant,
-        'OpenaiChat': OpenaiChat,
-        'PerplexityAi': PerplexityAi,
-        'Phind': Phind,
-        'Raycast': Raycast,
-        'Theb': Theb,
-        'V50': V50,
-        'Vercel': Vercel,
-        'Vitalentum': Vitalentum,
-        'Wewordle': Wewordle,
-        'Wuguokai': Wuguokai,
-        'Ylokh': Ylokh,
-        'You': You,
-        'Yqcloud': Yqcloud,
-        'Geekgpt': GeekGpt,
-        
-        'BaseProvider': BaseProvider,
-        'AsyncProvider': AsyncProvider,
-        'AsyncGeneratorProvider': AsyncGeneratorProvider,
-        'RetryProvider': RetryProvider,
-    }
-
-__all__ = [
-    'BaseProvider',
-    'AsyncProvider',
-    'AsyncGeneratorProvider',
-    'RetryProvider',
-    'Acytoo',
-    'AiAsk',
-    'Aibn',
-    'Aichat',
-    'Ails',
-    'Aivvm',
-    'AiService',
-    'AItianhu',
-    'AItianhuSpace',
-    'Aivvm',
-    'Bard',
-    'Bing',
-    #'ChatBase',
-    'ChatForAi',
-    'Chatgpt4Online',
-    'ChatgptAi',
-    'ChatgptDemo',
-    'ChatgptDuo',
-    'ChatgptFree',
-    'ChatgptLogin',
-    'ChatgptX',
-    'Cromicle',
-    'CodeLinkAva',
-    'DfeHub',
-    'EasyChat',
-    'Forefront',
-    'FakeGpt',
-    'FreeGpt',
-    'GPTalk',
-    'GptChatly',
-    'GptForLove',
-    'GetGpt',
-    'GptGo',
-    'GptGod',
-    'Hashnode',
-    'H2o',
-    'HuggingChat',
-    'Liaobots',
-    'Llama2',
-    'Lockchat',
-    'Myshell',
-    'MyShell',
-    'NoowAi',
-    'Opchatgpts',
-    'Raycast',
-    'OpenaiChat',
-    'OpenAssistant',
-    'PerplexityAi',
-    'Phind',
-    'Theb',
-    'Vercel',
-    'Vitalentum',
-    'Wewordle',
-    'Ylokh',
-    'You',
-    'Yqcloud',
-    'Equing',
-    'FastGpt',
-    'Wuguokai',
-    'V50',
-    'GeekGpt'
-]
+    convert: dict[str, type[BaseProvider]] = __map__

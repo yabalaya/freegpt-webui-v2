@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-import random, string
 from datetime import datetime
 
 from ..typing import AsyncResult, Messages
+from .base_provider import AsyncGeneratorProvider
 from ..requests import StreamSession
-from .base_provider import AsyncGeneratorProvider, format_prompt
-
 
 class Phind(AsyncGeneratorProvider):
     url = "https://www.phind.com"
     working = True
     supports_gpt_4 = True
+    supports_stream = True
+    supports_message_history = True
 
     @classmethod
     async def create_async_generator(
@@ -20,64 +20,55 @@ class Phind(AsyncGeneratorProvider):
         messages: Messages,
         proxy: str = None,
         timeout: int = 120,
+        creative_mode: bool = False,
         **kwargs
     ) -> AsyncResult:
-        chars = string.ascii_lowercase + string.digits
-        user_id = ''.join(random.choice(chars) for _ in range(24))
-        data = {
-            "question": format_prompt(messages),
-            "webResults": [],
-            "options": {
-                "date": datetime.now().strftime("%d.%m.%Y"),
-                "language": "en",
-                "detailed": True,
-                "anonUserId": user_id,
-                "answerModel": "GPT-4",
-                "creativeMode": False,
-                "customLinks": []
-            },
-            "context":""
-        }
         headers = {
-            "Authority": cls.url,
-            "Accept": "application/json, text/plain, */*",
+            "Accept": "*/*",
             "Origin": cls.url,
-            "Referer": f"{cls.url}/"
+            "Referer": f"{cls.url}/search",
+            "Sec-Fetch-Dest": "empty", 
+            "Sec-Fetch-Mode": "cors", 
+            "Sec-Fetch-Site": "same-origin",
         }
         async with StreamSession(
-            headers=headers,
-            timeout=(5, timeout),
+            impersonate="chrome110",
             proxies={"https": proxy},
-            impersonate="chrome107"
+            timeout=timeout
         ) as session:
-            async with session.post(f"{cls.url}/api/infer/answer", json=data) as response:
-                response.raise_for_status()
-                new_lines = 0
+            prompt = messages[-1]["content"]
+            data = {
+                "question": prompt,
+                "questionHistory": [
+                    message["content"] for message in messages[:-1] if message["role"] == "user"
+                ],
+                "answerHistory": [
+                    message["content"] for message in messages if message["role"] == "assistant"
+                ],
+                "webResults": [],
+                "options": {
+                    "date": datetime.now().strftime("%d.%m.%Y"),
+                    "language": "en-US",
+                    "detailed": True,
+                    "anonUserId": "",
+                    "answerModel": "GPT-4" if model.startswith("gpt-4") else "Phind Model",
+                    "creativeMode": creative_mode,
+                    "customLinks": []
+                },
+                "context": "",
+                "rewrittenQuestion": prompt
+            }
+            async with session.post(f"{cls.url}/api/infer/followup/answer", headers=headers, json=data) as response:
+                new_line = False
                 async for line in response.iter_lines():
-                    if not line:
-                        continue
                     if line.startswith(b"data: "):
-                        line = line[6:]
-                    if line.startswith(b"<PHIND_METADATA>"):
-                        continue
-                    if line:
-                        if new_lines:
-                            yield "".join(["\n" for _ in range(int(new_lines / 2))])
-                            new_lines = 0
-                        yield line.decode()
-                    else:
-                        new_lines += 1
-
-
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool"),
-            ("proxy", "str"),
-            ("timeout", "int"),
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"
+                        chunk = line[6:]
+                        if chunk.startswith(b"<PHIND_METADATA>"):
+                            pass
+                        elif chunk:
+                            yield chunk.decode()
+                        elif new_line:
+                            yield "\n"
+                            new_line = False
+                        else:
+                            new_line = True

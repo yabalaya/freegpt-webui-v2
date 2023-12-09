@@ -7,11 +7,12 @@ from json           import dumps
 
 
 class GeekGpt(BaseProvider):
-    url                   = 'https://chat.geekgpt.org'
-    supports_stream       = True
-    working               = True
+    url = 'https://chat.geekgpt.org'
+    working = True
+    supports_message_history = True
+    supports_stream = True
     supports_gpt_35_turbo = True
-    supports_gpt_4        = True
+    supports_gpt_4 = True
 
     @classmethod
     def create_completion(
@@ -70,15 +71,3 @@ class GeekGpt(BaseProvider):
                 
                 if content:
                     yield content
-
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ('model', 'str'),
-            ('messages', 'list[dict[str, str]]'),
-            ('stream', 'bool'),
-            ('temperature', 'float'),
-        ]
-        param = ', '.join([': '.join(p) for p in params])
-        return f'g4f.provider.{cls.__name__} supports: ({param})'

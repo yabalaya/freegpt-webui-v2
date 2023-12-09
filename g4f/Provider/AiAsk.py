@@ -6,8 +6,9 @@ from .base_provider import AsyncGeneratorProvider
 
 class AiAsk(AsyncGeneratorProvider):
     url = "https://e.aiask.me"
+    supports_message_history = True
     supports_gpt_35_turbo = True
-    working = True
+    working = False
 
     @classmethod
     async def create_async_generator(

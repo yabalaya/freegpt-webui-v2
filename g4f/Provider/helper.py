@@ -3,13 +3,26 @@ from __future__ import annotations
 import sys
 import asyncio
 import webbrowser
-
+import random
+import string
+import secrets
+import os
 from os              import path
 from asyncio         import AbstractEventLoop
 from platformdirs    import user_config_dir
+from browser_cookie3 import (
+    chrome,
+    chromium,
+    opera,
+    opera_gx,
+    brave,
+    edge,
+    vivaldi,
+    firefox,
+    _LinuxPasswordManager
+)
 
-from ..typing        import Dict, Messages
-from browser_cookie3 import chrome, chromium, opera, opera_gx, brave, edge, vivaldi, firefox, BrowserCookieError
+from ..typing import Dict, Messages
 from .. import debug
 
 # Change event loop policy on windows
@@ -69,6 +82,10 @@ def init_cookies():
         except webbrowser.Error:
             continue
 
+# Check for broken dbus address in docker image   
+if os.environ.get('DBUS_SESSION_BUS_ADDRESS') == "/dev/null":
+    _LinuxPasswordManager.get_password = lambda a, b: b"secret"
+    
 # Load cookies for a domain from all supported browsers.
 # Cache the results in the "_cookies" variable.
 def get_cookies(domain_name=''):
@@ -88,7 +105,7 @@ def get_cookies(domain_name=''):
             for cookie in cookie_jar:
                 if cookie.name not in cookies:
                     cookies[cookie.name] = cookie.value
-        except BrowserCookieError as e:
+        except:
             pass
     _cookies[domain_name] = cookies
     return _cookies[domain_name]
@@ -97,19 +114,18 @@ def get_cookies(domain_name=''):
 def format_prompt(messages: Messages, add_special_tokens=False) -> str:
     if not add_special_tokens and len(messages) <= 1:
         return messages[0]["content"]
-    formatted = "\n".join(
-        [
-            f'{message["role"].capitalize()}: {message["content"]}'
-            for message in messages
-        ]
-    )
+    formatted = "\n".join([
+        f'{message["role"].capitalize()}: {message["content"]}'
+        for message in messages
+    ])
     return f"{formatted}\nAssistant:"
 
 
-def get_browser(user_data_dir: str = None):
-    from undetected_chromedriver import Chrome
+def get_random_string(length: int = 10) -> str:
+    return ''.join(
+        random.choice(string.ascii_lowercase + string.digits)
+        for _ in range(length)
+    )
 
-    if not user_data_dir:
-        user_data_dir = user_config_dir("g4f")
-
-    return Chrome(user_data_dir=user_data_dir)
+def get_random_hex() -> str:
+    return secrets.token_hex(16).zfill(32)

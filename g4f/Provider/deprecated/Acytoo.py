@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from aiohttp import ClientSession
 
-from ..typing import AsyncResult, Messages
-from .base_provider import AsyncGeneratorProvider
+from ...typing import AsyncResult, Messages
+from ..base_provider import AsyncGeneratorProvider
 
 
 class Acytoo(AsyncGeneratorProvider):
     url                   = 'https://chat.acytoo.com'
     working               = False
+    supports_message_history = True
     supports_gpt_35_turbo = True
 
     @classmethod

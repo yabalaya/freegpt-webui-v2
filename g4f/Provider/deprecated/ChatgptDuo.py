@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from ..typing import Messages
+from ...typing import Messages
 from curl_cffi.requests import AsyncSession
-from .base_provider import AsyncProvider, format_prompt
+from ..base_provider import AsyncProvider, format_prompt
 
 
 class ChatgptDuo(AsyncProvider):
@@ -45,14 +45,3 @@ class ChatgptDuo(AsyncProvider):
     @classmethod
     def get_sources(cls):
         return cls._sources
-
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool"),
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"

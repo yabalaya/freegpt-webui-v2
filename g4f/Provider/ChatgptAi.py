@@ -8,8 +8,9 @@ from .base_provider import AsyncGeneratorProvider
 
 
 class ChatgptAi(AsyncGeneratorProvider):
-    url: str = "https://chatgpt.ai"
+    url = "https://chatgpt.ai"
     working = True
+    supports_message_history = True
     supports_gpt_35_turbo  = True
     _system = None
 
@@ -44,7 +45,9 @@ class ChatgptAi(AsyncGeneratorProvider):
                 async with session.get(cls.url, proxy=proxy) as response:
                     response.raise_for_status()
                     text = await response.text()
-                if result := re.search(r"data-system='(.*?)'", text):
+
+                result = re.search(r"data-system='(.*?)'", text)
+                if result :
                     cls._system = json.loads(html.unescape(result.group(1)))
             if not cls._system:
                 raise RuntimeError("System args not found")
@@ -62,7 +65,8 @@ class ChatgptAi(AsyncGeneratorProvider):
             async with session.post(
                f"{cls.url}/wp-json/mwai-ui/v1/chats/submit",
                 proxy=proxy,
-                json=data
+                json=data,
+                headers={"X-Wp-Nonce": cls._system["restNonce"]}
             ) as response:
                 response.raise_for_status()
                 async for line in response.content:

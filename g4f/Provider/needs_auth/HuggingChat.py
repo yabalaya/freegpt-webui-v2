@@ -11,7 +11,6 @@ from ..helper import format_prompt, get_cookies
 
 class HuggingChat(AsyncGeneratorProvider):
     url = "https://huggingface.co/chat"
-    needs_auth = True
     working = True
     model = "meta-llama/Llama-2-70b-chat-hf"
 
@@ -22,12 +21,11 @@ class HuggingChat(AsyncGeneratorProvider):
         messages: Messages,
         stream: bool = True,
         proxy: str = None,
+        web_search: bool = False,
         cookies: dict = None,
         **kwargs
     ) -> AsyncResult:
         model = model if model else cls.model
-        if proxy and "://" not in proxy:
-            proxy = f"http://{proxy}"
         if not cookies:
             cookies = get_cookies(".huggingface.co")
 
@@ -46,7 +44,7 @@ class HuggingChat(AsyncGeneratorProvider):
                 "inputs": format_prompt(messages),
                 "is_retry": False,
                 "response_id": str(uuid.uuid4()),
-                "web_search": False
+                "web_search": web_search
             }
             async with session.post(f"{cls.url}/conversation/{conversation_id}", json=send, proxy=proxy) as response:
                 async for line in response.content:
@@ -60,16 +58,3 @@ class HuggingChat(AsyncGeneratorProvider):
                 
             async with session.delete(f"{cls.url}/conversation/{conversation_id}", proxy=proxy) as response:
                 response.raise_for_status()
-
-
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool"),
-            ("proxy", "str"),
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"

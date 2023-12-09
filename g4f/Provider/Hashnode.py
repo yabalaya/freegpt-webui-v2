@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import secrets
 from aiohttp import ClientSession
 
 from ..typing import AsyncResult, Messages
 from .base_provider import AsyncGeneratorProvider
+from .helper import get_random_hex
 
 class SearchTypes():
     quick = "quick"
@@ -13,8 +13,9 @@ class SearchTypes():
 
 class Hashnode(AsyncGeneratorProvider):
     url = "https://hashnode.com"
-    supports_gpt_35_turbo = True
     working = True
+    supports_message_history = True
+    supports_gpt_35_turbo = True
     _sources = []
 
     @classmethod
@@ -54,7 +55,7 @@ class Hashnode(AsyncGeneratorProvider):
                     response.raise_for_status()
                     cls._sources = (await response.json())["result"]
             data = {
-                "chatId": secrets.token_hex(16).zfill(32),
+                "chatId": get_random_hex(),
                 "history": messages,
                 "prompt": prompt,
                 "searchType": search_type,

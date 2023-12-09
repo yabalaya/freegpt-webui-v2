@@ -11,9 +11,10 @@ domains = [
 ]
 
 class FreeGpt(AsyncGeneratorProvider):
-    url                   = "https://freegpts1.aifree.site/"
+    url = "https://freegpts1.aifree.site/"
+    working = False
+    supports_message_history = True
     supports_gpt_35_turbo = True
-    working               = True
 
     @classmethod
     async def create_async_generator(
@@ -46,16 +47,6 @@ class FreeGpt(AsyncGeneratorProvider):
                         raise RuntimeError("Rate limit reached")
                     yield chunk
 
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool"),
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"
     
 def generate_signature(timestamp: int, message: str, secret: str = ""):
     data = f"{timestamp}:{message}:{secret}"

@@ -3,15 +3,16 @@ from __future__ import annotations
 import time
 import hashlib
 
-from ..typing import AsyncResult, Messages
-from ..requests import StreamSession
-from .base_provider import AsyncGeneratorProvider
+from ...typing import AsyncResult, Messages
+from ...requests import StreamSession
+from ..base_provider import AsyncGeneratorProvider
 
 
 class Aibn(AsyncGeneratorProvider):
-    url                   = "https://aibn.cc"
+    url = "https://aibn.cc"
+    working = False
+    supports_message_history = True
     supports_gpt_35_turbo = True
-    working               = False
 
     @classmethod
     async def create_async_generator(
@@ -38,18 +39,6 @@ class Aibn(AsyncGeneratorProvider):
                 response.raise_for_status()
                 async for chunk in response.iter_content():
                     yield chunk.decode()
-
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool"),
-            ("temperature", "float"),
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"
     
 
 def generate_signature(timestamp: int, message: str, secret: str = "undefined"):

@@ -9,8 +9,8 @@ from .helper import format_prompt
 
 class GptForLove(AsyncGeneratorProvider):
     url = "https://ai18.gptforlove.com"
-    supports_gpt_35_turbo = True
     working = True
+    supports_gpt_35_turbo = True
 
     @classmethod
     async def create_async_generator(
@@ -55,9 +55,8 @@ class GptForLove(AsyncGeneratorProvider):
                     except:
                         raise RuntimeError(f"Broken line: {line}")
                     if "detail" in line:
-                        if content := line["detail"]["choices"][0]["delta"].get(
-                            "content"
-                        ):
+                        content = line["detail"]["choices"][0]["delta"].get("content")
+                        if content:
                             yield content
                     elif "10分钟内提问超过了5次" in line:
                         raise RuntimeError("Rate limit reached")
