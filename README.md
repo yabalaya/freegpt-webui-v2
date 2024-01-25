@@ -1,5 +1,12 @@
 # FreeGPT WebUI v2
-<img src="https://github.com/VadimBoev/freegpt-webui-v2/blob/main/webui-gpt.png" width="1000" />
+
+With some UI improvements 😄
+  
+Desktop
+<img src="https://github.com/Mylinde/freegpt-webui-v2/blob/main/webui-gpt.png" width="1000" />
+  
+Mobile Device  
+<img src="https://github.com/Mylinde/freegpt-webui-v2/blob/main/mobile-ui.png" width="30%" />
 
 ## GPT 3.5/4
 
@@ -14,8 +21,7 @@ We will solve a question or a problem together! 🌍
 You can [buy me coffee](https://boosty.to/vadimboev/donate) here ☕🤎
 
 ## Known bugs 🚧
-- Web Access is not working.  
-Because the API that was used earlier in the "freegpt-webui" repository from ramonvc stopped working. This will be fixed later
+- Copying highlighted Text not working.
 
 ## Features v2 📢
 - Updated g4f
@@ -63,7 +69,7 @@ pip install -r requirements.txt
 ## Running the Application :rocket:
 To run the application, run the following command:
 ```
-python run.py
+python3 run.py
 ```
 
 Access the application in your browser using the URL:
